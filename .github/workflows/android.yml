@@ -62,26 +62,7 @@ jobs:
             --no-daemon \
             --stacktrace
 
-      # 7. Locate APK
-      - name: Locate Release APK
-        id: apk
-        shell: bash
-        run: |
-          APK=$(find . -type f \
-            -path "*/build/outputs/apk/release/*.apk" \
-            ! -name "*unsigned*" \
-            | head -n 1)
-
-          if [ -z "$APK" ]; then
-            echo "No Release APK found."
-            find . -type f -name "*.apk"
-            exit 1
-          fi
-
-          echo "path=$APK" >> "$GITHUB_OUTPUT"
-          echo "Found: $APK"
-
-      # 8. Sign APK
+      # 7. Sign APK
       - name: Sign Android APK
         id: sign
         uses: r0adkll/sign-android-release@v1
@@ -92,7 +73,7 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-      # 9. Verify signature
+      # 8. Verify signature
       - name: Verify APK Signature
         env:
           APK: ${{ steps.sign.outputs.signedReleaseFile }}
@@ -101,7 +82,7 @@ jobs:
           apksigner verify --verbose "$APK"
           ls -lh "$APK"
 
-      # 10. Publish GitHub Release
+      # 9. Publish GitHub Release
       - name: Publish Final Release
         uses: softprops/action-gh-release@v2
         with:
